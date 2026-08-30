@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cambridge IELTS 21 Academic Listening Test 1</title>
+    <!-- Include html2canvas for the screenshot feature -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --top-bar-bg: #333333;
+            --bottom-bar-bg: #e0e0e0;
+            --main-bg: #808080;
+            --content-bg: #ffffff;
+            --accent-red: #c5221f;
+            --accent-blue: #1a73e8;
+            --text-light: #ffffff;
+            --text-dark: #333333;
+            --border-color: #cccccc;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: var(--content-bg); color: var(--text-dark); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* --- Screens --- */
+        #start-screen, #results-screen { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: #f4f6f8; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; z-index: 1000; overflow-y: auto; padding: 20px;
+        }
+        .box-card { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 800px; text-align: center; }
+        .box-card h1 { color: var(--text-dark); margin-bottom: 10px; }
+        .name-input-box { padding: 12px; font-size: 16px; width: 100%; max-width: 300px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 20px; text-align: center; }
+        .btn-primary { background-color: var(--accent-blue); color: white; padding: 12px 30px; border: none; cursor: pointer; font-weight: bold; font-size: 16px; border-radius: 4px; }
+        .btn-danger { background-color: var(--accent-red); color: white; padding: 8px 20px; border: none; cursor: pointer; font-weight: bold; font-size: 14px; border-radius: 4px; }
+        
+        /* --- Test Interface --- */
+        #test-container { display: none; flex-direction: column; height: 100vh; width: 100%; }
+        #top-bar { background-color: var(--top-bar-bg); color: var(--text-light); display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; height: 60px; }
+        .top-left { display: flex; flex-direction: column; font-size: 14px; }
+        .top-left strong { font-size: 16px; }
+        .timer-display { font-size: 13px; color: #aaa; }
+        .top-right { display: flex; align-items: center; gap: 20px; }
+        
+        #main-content { flex: 1; position: relative; background-color: var(--main-bg); overflow-y: auto; }
+        .part-container { display: none; background-color: var(--content-bg); min-height: 100%; padding: 40px; max-width: 1000px; margin: 0 auto; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        .part-container.active { display: block; }
+
+        /* --- Audio Overlay --- */
+        .audio-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(60, 60, 60, 0.95); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 50; color: white; text-align: center; padding: 20px;
+        }
+        .headphone-icon { font-size: 60px; margin-bottom: 20px; }
+        .audio-overlay p { margin-bottom: 20px; font-size: 16px; max-width: 600px; line-height: 1.5; }
+        .btn-play { background-color: black; color: white; border: 1px solid white; padding: 10px 30px; font-size: 16px; cursor: pointer; border-radius: 4px; display: flex; align-items: center; gap: 10px; }
+        .btn-play:hover { background-color: #222; }
+        audio { display: none; }
+
+        /* --- Content Styling --- */
+        h2 { font-size: 18px; margin-bottom: 10px; }
+        .instructions { font-size: 14px; margin-bottom: 20px; font-style: italic; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 40px; font-size: 14px; }
+        th, td { border: 1px solid var(--border-color); padding: 12px; text-align: left; vertical-align: top; }
+        th { background-color: #f9f9f9; text-align: center; }
+        .input-group { display: inline-flex; align-items: center; margin: 0 5px; }
+        .q-num { background: #333; color: white; padding: 2px 6px; font-weight: bold; font-size: 12px; border-radius: 2px; margin-right: 5px; }
+        .input-box { border: 1px solid #999; padding: 4px 8px; width: 140px; font-size: 14px; background-color: #fff; }
+        .input-box:focus { background-color: #fff9c4; outline: none; border-color: #fbc02d; }
+        .mcq-container { margin-bottom: 20px; font-size: 14px; }
+        .mcq-question { font-weight: bold; margin-bottom: 10px; display: flex; gap: 8px; }
+        .mcq-option { display: flex; align-items: center; margin-bottom: 8px; padding-left: 10px; cursor: pointer; gap: 8px; }
+        .matching-wrapper { display: flex; gap: 40px; margin-bottom: 40px; font-size: 14px; }
+        .matching-questions { flex: 1; }
+        .matching-item { margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
+        .matching-options { flex: 1; background: #f8f9fa; border: 1px solid #e0e0e0; padding: 15px; border-radius: 4px; }
+        .matching-options-title { font-size: 12px; color: #666; margin-bottom: 10px; font-style: italic; font-weight: bold; }
+        .option-box { border: 1px solid #ccc; background: #fff; padding: 6px 10px; margin-bottom: 8px; }
+        .notes-section { border: 1px solid #e0e0e0; padding: 20px; margin-bottom: 40px; font-size: 14px; }
+        ul { padding-left: 20px; margin: 0; } li { margin-bottom: 10px; line-height: 1.5; }
+
+        /* --- Navigation --- */
+        #bottom-bar { background-color: var(--bottom-bar-bg); height: 60px; display: flex; align-items: center; padding: 0 20px; justify-content: space-between; border-top: 1px solid #ccc; }
+        .nav-parts { display: flex; gap: 30px; font-size: 13px; font-weight: bold; color: #555; align-items: center; }
+        .nav-part-item { display: flex; align-items: center; gap: 5px; }
+        .nav-part-item.active { color: #000; }
+        .q-squares { display: flex; gap: 2px; margin-left: 10px; }
+        .q-square { width: 22px; height: 22px; background: transparent; border: 1px solid #999; display: flex; align-items: center; justify-content: center; font-size: 11px; cursor: pointer; color: #333; }
+        .q-square.answered { background: #555; color: white; border-color: #555; }
+        .nav-arrows { display: flex; gap: 10px; }
+        .btn-nav { background: #333; color: white; border: none; padding: 8px 15px; cursor: pointer; font-size: 16px; border-radius: 2px; }
+        .btn-nav:disabled { background: #999; cursor: not-allowed; }
+
+        /* --- Results Table --- */
+        .results-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; text-align: left; }
+        .results-table th, .results-table td { border: 1px solid #ddd; padding: 8px; }
+        .results-table th { background-color: #f1f3f4; position: sticky; top: 0; z-index: 10; }
+        .correct { color: #137333; font-weight: bold; }
+        .incorrect { color: #c5221f; font-weight: bold; }
+        .actions { margin-top: 20px; display: flex; gap: 15px; justify-content: center; }
+        
+        #table-scroll-container { flex: 1; overflow-y: auto; margin: 20px 0; border: 1px solid #ddd; background: #fff; }
+    </style>
+</head>
+<body>
+
+<div id="start-screen">
+    <div class="box-card">
+        <h1>IELTS Listening Test</h1>
+        <p style="margin-bottom: 20px; color: #666;">Cambridge 21 Academic - Test 1</p>
+        <input type="text" id="candidateName" class="name-input-box" placeholder="Enter Full Name" autocomplete="off">
+        <button id="startBtn" class="btn-primary" type="button">Start Test</button>
+    </div>
+</div>
+
+<div id="test-container">
+    <div id="top-bar">
+        <div class="top-left">
+            <strong>Listening Test - 01</strong>
+            <span class="timer-display"><span id="timer">30:00</span> remaining</span>
+        </div>
+        <div class="top-right">
+            <span id="candidateDisplay" style="font-size: 14px; color: #ccc;"></span>
+            <button id="topSubmitBtn" class="btn-danger">Submit</button>
+        </div>
+    </div>
+
+    <div id="main-content">
+        <!-- PART 1 -->
+        <div class="part-container active" id="part-1">
+            <div class="audio-overlay" id="overlay-1">
+                <div class="headphone-icon">🎧</div>
+                <p>You will be listening to an audio clip during this test. You will not be permitted to pause or rewind the audio while answering the questions.</p>
+                <button class="btn-play" onclick="playAudio(1)">▶ Play</button>
+            </div>
+            <audio id="audio-1" src="https://archive.org/download/part1_audio.mp3/part1_audio.mp3.mp3" preload="auto"></audio>
+
+            <h2>Part 1</h2><p>Listen and answer questions 1 - 10.</p>
+            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+            
+            <div class="instructions">Complete the table below. Write ONE WORD AND/OR A NUMBER for each answer.</div>
+            <table>
+                <thead><tr><th>Name of course</th><th>What you learn</th><th>Cost</th><th>Other information</th></tr></thead>
+                <tbody>
+                    <tr>
+                        <td>Taster day</td><td>introduction to sailing</td><td>£120 if booking one place</td>
+                        <td>small groups (max <span class="input-group"><span class="q-num">1</span><input type="text" class="input-box q-input" data-q="1"></span> people)</td>
+                    </tr>
+                    <tr>
+                        <td>Level 1</td>
+                        <td>
+                            <div style="margin-bottom:10px;">basic theory e.g. understanding the <span class="input-group"><span class="q-num">2</span><input type="text" class="input-box q-input" data-q="2"></span> and tides</div>
+                            <div>basic sailing skills including <span class="input-group"><span class="q-num">3</span><input type="text" class="input-box q-input" data-q="3"></span> information</div>
+                        </td>
+                        <td>
+                            <div style="margin-bottom:10px;">£200</div>
+                            <div style="margin-bottom:10px;"><span class="input-group"><span class="q-num">4</span><input type="text" class="input-box q-input" data-q="4"></span> available for club members</div>
+                            <div>all inclusive (plus a useful <span class="input-group"><span class="q-num">5</span><input type="text" class="input-box q-input" data-q="5"></span>)</div>
+                        </td>
+                        <td>a <span class="input-group"><span class="q-num">6</span><input type="text" class="input-box q-input" data-q="6"></span> at the end of the course for all participants</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="instructions">Complete the notes below. Write ONE WORD ONLY for each answer.</div>
+            <div class="notes-section">
+                <h3>General information</h3>
+                <br>
+                <ul>
+                    <li>Participants must be able to swim.</li>
+                    <li>Bring suitable clothing, a <span class="input-group"><span class="q-num">7</span><input type="text" class="input-box q-input" data-q="7"></span> and toiletries (e.g. shampoo).</li>
+                    <li>There is a <span class="input-group"><span class="q-num">8</span><input type="text" class="input-box q-input" data-q="8"></span> at the club.</li>
+                    <li>Online training <span class="input-group"><span class="q-num">9</span><input type="text" class="input-box q-input" data-q="9"></span> are recommended.</li>
+                    <li><span class="input-group"><span class="q-num">10</span><input type="text" class="input-box q-input" data-q="10"></span> are available for course participants.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- PART 2 -->
+        <div class="part-container" id="part-2">
+            <div class="audio-overlay" id="overlay-2">
+                <div class="headphone-icon">🎧</div>
+                <p>You will be listening to an audio clip during this test. You will not be permitted to pause or rewind the audio while answering the questions.</p>
+                <button class="btn-play" onclick="playAudio(2)">▶ Play</button>
+            </div>
+            <audio id="audio-2" src="https://archive.org/download/part1_audio.mp3/part2_audio.mp3.mp3" preload="auto"></audio>
+
+            <h2>Part 2</h2><p>Listen and answer questions 11 - 20.</p>
+            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+            
+            <div class="instructions">Choose the correct letter, A, B or C.</div>
+            <div class="mcq-container">
+                <div class="mcq-question"><span class="q-num">11</span> What should trainees always expect to get when working on low budget short films?</div>
+                <label class="mcq-option"><input type="radio" name="q11" value="A" class="q-input" data-q="11"> A &nbsp; travel expenses</label>
+                <label class="mcq-option"><input type="radio" name="q11" value="B" class="q-input" data-q="11"> B &nbsp; a minimum wage</label>
+                <label class="mcq-option"><input type="radio" name="q11" value="C" class="q-input" data-q="11"> C &nbsp; meals</label>
+            </div>
+            <div class="mcq-container">
+                <div class="mcq-question"><span class="q-num">12</span> According to the speaker, on big budget films trainees may get experience of</div>
+                <label class="mcq-option"><input type="radio" name="q12" value="A" class="q-input" data-q="12"> A &nbsp; makeup for special effects.</label>
+                <label class="mcq-option"><input type="radio" name="q12" value="B" class="q-input" data-q="12"> B &nbsp; working with different ethnicities.</label>
+                <label class="mcq-option"><input type="radio" name="q12" value="C" class="q-input" data-q="12"> C &nbsp; creating a variety of hair styles.</label>
+            </div>
+            <div class="mcq-container">
+                <div class="mcq-question"><span class="q-num">13</span> The speaker says a problem for makeup artists is</div>
+                <label class="mcq-option"><input type="radio" name="q13" value="A" class="q-input" data-q="13"> A &nbsp; dealing with difficult directors.</label>
+                <label class="mcq-option"><input type="radio" name="q13" value="B" class="q-input" data-q="13"> B &nbsp; being shouted at by their supervisor.</label>
+                <label class="mcq-option"><input type="radio" name="q13" value="C" class="q-input" data-q="13"> C &nbsp; waiting around for hours doing nothing.</label>
+            </div>
+            <div class="mcq-container">
+                <div class="mcq-question"><span class="q-num">14</span> How did the speaker feel when she met famous actors for the first time?</div>
+                <label class="mcq-option"><input type="radio" name="q14" value="A" class="q-input" data-q="14"> A &nbsp; very shy</label>
+                <label class="mcq-option"><input type="radio" name="q14" value="B" class="q-input" data-q="14"> B &nbsp; very proud</label>
+                <label class="mcq-option"><input type="radio" name="q14" value="C" class="q-input" data-q="14"> C &nbsp; very disappointed</label>
+            </div>
+            <div class="mcq-container">
+                <div class="mcq-question"><span class="q-num">15</span> What advice does the speaker give about makeup kits?</div>
+                <label class="mcq-option"><input type="radio" name="q15" value="A" class="q-input" data-q="15"> A &nbsp; Always carry a basic kit with you.</label>
+                <label class="mcq-option"><input type="radio" name="q15" value="B" class="q-input" data-q="15"> B &nbsp; Only buy the best products for a makeup kit.</label>
+                <label class="mcq-option"><input type="radio" name="q15" value="C" class="q-input" data-q="15"> C &nbsp; Ask other makeup artists to check your kit.</label>
+            </div>
+            <div class="mcq-container">
+                <div class="mcq-question"><span class="q-num">16</span> What advice does the speaker give about creating a portfolio?</div>
+                <label class="mcq-option"><input type="radio" name="q16" value="A" class="q-input" data-q="16"> A &nbsp; Keep print and digital photos.</label>
+                <label class="mcq-option"><input type="radio" name="q16" value="B" class="q-input" data-q="16"> B &nbsp; Only include a small selection of photos.</label>
+                <label class="mcq-option"><input type="radio" name="q16" value="C" class="q-input" data-q="16"> C &nbsp; Get permission to use photos.</label>
+            </div>
+
+            <div class="instructions" style="margin-top:40px;">What ability is required for each of the following duties? Write A, B, or C.</div>
+            <div class="matching-wrapper">
+                <div class="matching-questions">
+                    <div class="matching-item">• Prepping an actor <span class="input-group"><span class="q-num">17</span><input type="text" class="input-box q-input" data-q="17" style="width:50px;"></span></div>
+                    <div class="matching-item">• Continuity <span class="input-group"><span class="q-num">18</span><input type="text" class="input-box q-input" data-q="18" style="width:50px;"></span></div>
+                    <div class="matching-item">• General <span class="input-group"><span class="q-num">19</span><input type="text" class="input-box q-input" data-q="19" style="width:50px;"></span></div>
+                    <div class="matching-item">• Applying makeup <span class="input-group"><span class="q-num">20</span><input type="text" class="input-box q-input" data-q="20" style="width:50px;"></span></div>
+                </div>
+                <div class="matching-options">
+                    <div class="matching-options-title">Options</div>
+                    <div class="option-box">A. being well-organised</div>
+                    <div class="option-box">B. being flexible</div>
+                    <div class="option-box">C. working quickly</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PART 3 -->
+        <div class="part-container" id="part-3">
+            <div class="audio-overlay" id="overlay-3">
+                <div class="headphone-icon">🎧</div>
+                <p>You will be listening to an audio clip during this test. You will not be permitted to pause or rewind the audio while answering the questions.</p>
+                <button class="btn-play" onclick="playAudio(3)">▶ Play</button>
+            </div>
+            <audio id="audio-3" src="https://archive.org/download/part1_audio.mp3/part3_audio.mp3.mp3" preload="auto"></audio>
+
+            <h2>Part 3</h2><p>Listen and answer questions 21 - 30.</p>
+            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+            
+            <div class="instructions">Choose TWO letters, A-E.</div>
+            <div class="mcq-container">
+                <div class="mcq-question"><span class="q-num">21-22</span> Which TWO features of the lecture on ocean biodiversity had the greatest impact on the students?</div>
+                <label class="mcq-option"><input type="checkbox" name="q21_22" value="A" class="q-input checkbox-multi"> A. the references to local problems</label>
+                <label class="mcq-option"><input type="checkbox" name="q21_22" value="B" class="q-input checkbox-multi"> B. the broad focus of the examples</label>
+                <label class="mcq-option"><input type="checkbox" name="q21_22" value="C" class="q-input checkbox-multi"> C. the practical suggestions for solutions</label>
+                <label class="mcq-option"><input type="checkbox" name="q21_22" value="D" class="q-input checkbox-multi"> D. the type of issues discussed</label>
+                <label class="mcq-option"><input type="checkbox" name="q21_22" value="E" class="q-input checkbox-multi"> E. the implications for government policy</label>
+            </div>
+
+            <div class="instructions">Choose TWO letters, A-E.</div>
+            <div class="mcq-container">
+                <div class="mcq-question"><span class="q-num">23-24</span> Which TWO details about the research project particularly impressed the students?</div>
+                <label class="mcq-option"><input type="checkbox" name="q23_24" value="A" class="q-input checkbox-multi"> A. the team's previous successes</label>
+                <label class="mcq-option"><input type="checkbox" name="q23_24" value="B" class="q-input checkbox-multi"> B. its wide geographical scale</label>
+                <label class="mcq-option"><input type="checkbox" name="q23_24" value="C" class="q-input checkbox-multi"> C. the use of new technology</label>
+                <label class="mcq-option"><input type="checkbox" name="q23_24" value="D" class="q-input checkbox-multi"> D. the extensive statistical evidence</label>
+                <label class="mcq-option"><input type="checkbox" name="q23_24" value="E" class="q-input checkbox-multi"> E. the large range of specialists involved</label>
+            </div>
+
+            <div class="instructions" style="margin-top:40px;">What is the students' opinion of each of the following resources related to ocean biodiversity? Choose A-H.</div>
+            <div class="matching-wrapper">
+                <div class="matching-questions">
+                    <div class="matching-item">• Article on invasive lionfish <span class="input-group"><span class="q-num">25</span><input type="text" class="input-box q-input" data-q="25" style="width:50px;"></span></div>
+                    <div class="matching-item">• Documentary on microplastics <span class="input-group"><span class="q-num">26</span><input type="text" class="input-box q-input" data-q="26" style="width:50px;"></span></div>
+                    <div class="matching-item">• Podcast on ocean pollution <span class="input-group"><span class="q-num">27</span><input type="text" class="input-box q-input" data-q="27" style="width:50px;"></span></div>
+                    <div class="matching-item">• Book on coastal ecosystems <span class="input-group"><span class="q-num">28</span><input type="text" class="input-box q-input" data-q="28" style="width:50px;"></span></div>
+                    <div class="matching-item">• Article on metal toxicity <span class="input-group"><span class="q-num">29</span><input type="text" class="input-box q-input" data-q="29" style="width:50px;"></span></div>
+                    <div class="matching-item">• Podcast on floating marine cities <span class="input-group"><span class="q-num">30</span><input type="text" class="input-box q-input" data-q="30" style="width:50px;"></span></div>
+                </div>
+                <div class="matching-options">
+                    <div class="matching-options-title">Options</div>
+                    <div class="option-box">A. specialist audience</div>
+                    <div class="option-box">B. outdated</div>
+                    <div class="option-box">C. effective description of new danger</div>
+                    <div class="option-box">D. suggests improvements</div>
+                    <div class="option-box">E. unbalanced account</div>
+                    <div class="option-box">F. predictable</div>
+                    <div class="option-box">G. insufficient evidence</div>
+                    <div class="option-box">H. clear explanation</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PART 4 -->
+        <div class="part-container" id="part-4">
+            <div class="audio-overlay" id="overlay-4">
+                <div class="headphone-icon">🎧</div>
+                <p>You will be listening to an audio clip during this test. You will not be permitted to pause or rewind the audio while answering the questions.</p>
+                <button class="btn-play" onclick="playAudio(4)">▶ Play</button>
+            </div>
+            <audio id="audio-4" src="https://archive.org/download/part1_audio.mp3/part4_audio.mp3.mp3" preload="auto"></audio>
+
+            <h2>Part 4</h2><p>Listen and answer questions 31 - 40.</p>
+            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+            
+            <div class="instructions">Complete the notes below. Write ONE WORD ONLY for each answer.</div>
+            <div class="notes-section">
+                <h3 style="margin-bottom:10px;">Sources of rubber</h3>
+                <p style="margin-bottom:10px;">Three resources essential for industrial civilisation:</p>
+                <ul>
+                    <li><span class="input-group"><span class="q-num">31</span><input type="text" class="input-box q-input" data-q="31"></span></li>
+                    <li>fossil fuels</li>
+                    <li>rubber</li>
+                </ul>
+                <br>
+                <h3 style="margin-bottom:10px;">Natural rubber</h3>
+                <ul>
+                    <li>growth of the tree is <span class="input-group"><span class="q-num">32</span><input type="text" class="input-box q-input" data-q="32"></span>.</li>
+                    <li>production adjustments depend on increasing/decreasing <span class="input-group"><span class="q-num">33</span><input type="text" class="input-box q-input" data-q="33"></span>.</li>
+                    <li>tree only grows near the <span class="input-group"><span class="q-num">34</span><input type="text" class="input-box q-input" data-q="34"></span>.</li>
+                    <li>difficult to <span class="input-group"><span class="q-num">35</span><input type="text" class="input-box q-input" data-q="35"></span> rubber after production.</li>
+                </ul>
+                <br>
+                <h3 style="margin-bottom:10px;">New threats &amp; Alternatives</h3>
+                <ul>
+                    <li>danger of disease caused by a <span class="input-group"><span class="q-num">36</span><input type="text" class="input-box q-input" data-q="36"></span>.</li>
+                    <li>extreme <span class="input-group"><span class="q-num">37</span><input type="text" class="input-box q-input" data-q="37"></span> events.</li>
+                    <li>synthetic rubber is less <span class="input-group"><span class="q-num">38</span><input type="text" class="input-box q-input" data-q="38"></span> than natural rubber.</li>
+                    <li>alternative dandelion rubber found in its <span class="input-group"><span class="q-num">39</span><input type="text" class="input-box q-input" data-q="39"></span>.</li>
+                    <li>does not require good <span class="input-group"><span class="q-num">40</span><input type="text" class="input-box q-input" data-q="40"></span>.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div id="bottom-bar">
+        <div class="nav-parts" id="nav-parts-container"></div>
+        <div class="nav-arrows">
+            <button class="btn-nav" id="btn-prev" onclick="changePart(-1)">←</button>
+            <button class="btn-nav" id="btn-next" onclick="changePart(1)">→</button>
+        </div>
+    </div>
+</div>
+
+<!-- RESULTS SCREEN -->
+<div id="results-screen" style="display:none;">
+    <div class="box-card" id="results-card" style="max-width: 900px; max-height: 95vh; display: flex; flex-direction: column;">
+        <h2 style="margin-bottom: 5px;">Test Submitted</h2>
+        <h4 id="results-name" style="color: #666; margin-bottom: 10px;">Candidate: </h4>
+        <h1 id="final-score" style="color: var(--accent-blue); margin: 10px 0;">Score: 0 / 40</h1>
+        
+        <div id="table-scroll-container">
+            <table class="results-table" id="results-table" style="margin-top: 0;">
+                <thead>
+                    <tr>
+                        <th>Q#</th>
+                        <th>Your Answer</th>
+                        <th>Correct Answer</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="results-body"></tbody>
+            </table>
+        </div>
+
+        <div class="actions" data-html2canvas-ignore="true">
+            <button class="btn-primary" id="btn-screenshot" onclick="downloadScreenshot()">📷 Download Screenshot</button>
+            <button class="btn-danger" onclick="location.reload()">Restart Test</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const TOTAL_PARTS = 4;
+    const TIME_LIMIT_MINUTES = 30;
+    const SECRET_PASSWORD = "reema14"; // Password protection set to reema14
+    
+    const answerKey = {
+        1: ["10", "ten"], 2: ["weather"], 3: ["safety"], 4: ["discount"], 5: ["dictionary"], 
+        6: ["certificate"], 7: ["towel"], 8: ["cafe", "café"], 9: ["videos"], 10: ["lockers"],
+        11: ["A"], 12: ["B"], 13: ["A"], 14: ["A"], 15: ["A"], 16: ["C"],
+        17: ["C"], 18: ["A"], 19: ["B"], 20: ["C"],
+        25: ["g"], 26: ["b"], 27: ["f"], 28: ["h"], 29: ["a"], 30: ["e"],
+        31: ["metals", "metal"], 32: ["slow"], 33: ["demand"], 34: ["equator"], 35: ["recycle"], 
+        36: ["fungus"], 37: ["weather"], 38: ["strong"], 39: ["roots"], 40: ["soil"]
+    };
+    
+    const multiAnswerKey = {
+        'q21_22': ["B", "D"],
+        'q23_24': ["C", "E"]
+    };
+
+    let currentPart = 1;
+    let countdown;
+    let userAnswers = {}; 
+    let multiSelections = {'q21_22': [], 'q23_24': []}; 
+    let audioCompleted = {1: false, 2: false, 3: false, 4: false};
+
+    window.addEventListener('DOMContentLoaded', () => {
+        for (let i = 1; i <= TOTAL_PARTS; i++) {
+            let a = document.getElementById(`audio-${i}`);
+            if (a) {
+                a.addEventListener('ended', () => {
+                    audioCompleted[i] = true;
+                });
+            }
+        }
+    });
+
+    document.getElementById('startBtn').onclick = () => {
+        const enteredPassword = prompt("Please enter the test access password:");
+        
+        if (enteredPassword !== SECRET_PASSWORD) {
+            alert("Incorrect password! Access denied.");
+            return;
+        }
+
+        const name = document.getElementById('candidateName').value.trim();
+        if (!name) return alert("Please enter your name.");
+        
+        document.getElementById('candidateDisplay').textContent = `Candidate: ${name}`;
+        document.getElementById('results-name').textContent = `Candidate: ${name}`;
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('test-container').style.display = 'flex';
+        
+        buildBottomNav();
+        startTimer();
+        trackInputs();
+    };
+
+    function startTimer() {
+        let timeLeft = TIME_LIMIT_MINUTES * 60;
+        countdown = setInterval(() => {
+            let m = Math.floor(timeLeft / 60);
+            let s = timeLeft % 60;
+            document.getElementById('timer').textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                submitTest();
+            }
+            timeLeft--;
+        }, 1000);
+    }
+
+    function playAudio(partNum) {
+        document.getElementById(`overlay-${partNum}`).style.display = 'none';
+        const audioEl = document.getElementById(`audio-${partNum}`);
+        audioEl.play().catch(error => {
+            console.error("Audio failed to play:", error);
+            alert("Audio could not start. Please ensure your browser allows audio playback.");
+        });
+    }
+
+    function buildBottomNav() {
+        const container = document.getElementById('nav-parts-container');
+        container.innerHTML = '';
+        for (let p = 1; p <= TOTAL_PARTS; p++) {
+            let partDiv = document.createElement('div');
+            partDiv.className = `nav-part-item ${p === currentPart ? 'active' : ''}`;
+            
+            let titleSpan = document.createElement('span');
+            titleSpan.textContent = `Part ${p}`;
+            partDiv.appendChild(titleSpan);
+
+            if (p === currentPart) {
+                let squaresDiv = document.createElement('div');
+                squaresDiv.className = 'q-squares';
+                let startQ = (p - 1) * 10 + 1;
+                for (let q = startQ; q < startQ + 10; q++) {
+                    let sq = document.createElement('div');
+                    sq.className = 'q-square';
+                    sq.id = `nav-sq-${q}`;
+                    sq.textContent = q;
+                    
+                    if ([21, 22].includes(q)) {
+                        if (multiSelections['q21_22'].length >= (q === 21 ? 1 : 2)) sq.classList.add('answered');
+                    } else if ([23, 24].includes(q)) {
+                        if (multiSelections['q23_24'].length >= (q === 23 ? 1 : 2)) sq.classList.add('answered');
+                    } else if (userAnswers[q] && userAnswers[q] !== '') {
+                        sq.classList.add('answered');
+                    }
+                    squaresDiv.appendChild(sq);
+                }
+                partDiv.appendChild(squaresDiv);
+            } else {
+                let summarySpan = document.createElement('span');
+                summarySpan.style.color = '#888';
+                summarySpan.style.marginLeft = '10px';
+                let ansCount = 0;
+                let startQ = (p - 1) * 10 + 1;
+                for(let i=startQ; i<startQ+10; i++) {
+                    if ([21, 22].includes(i)) {
+                        if (multiSelections['q21_22'].length >= (i === 21 ? 1 : 2)) ansCount++;
+                    } else if ([23, 24].includes(i)) {
+                        if (multiSelections['q23_24'].length >= (i === 23 ? 1 : 2)) ansCount++;
+                    } else if (userAnswers[i] && userAnswers[i] !== '') {
+                        ansCount++;
+                    }
+                }
+                summarySpan.textContent = `${ansCount} of 10`;
+                partDiv.appendChild(summarySpan);
+            }
+            container.appendChild(partDiv);
+        }
+        
+        document.getElementById('btn-prev').disabled = currentPart === 1;
+        document.getElementById('btn-next').disabled = currentPart === TOTAL_PARTS;
+    }
+
+    function changePart(dir) {
+        if (dir === 1 && !audioCompleted[currentPart]) {
+            alert("You must finish listening to the audio for this part before you can move to the next part.");
+            return;
+        }
+
+        document.getElementById(`part-${currentPart}`).classList.remove('active');
+        currentPart += dir;
+        document.getElementById(`part-${currentPart}`).classList.add('active');
+        buildBottomNav();
+    }
+
+    function trackInputs() {
+        document.querySelectorAll('.q-input').forEach(input => {
+            input.addEventListener('input', (e) => {
+                if (e.target.classList.contains('checkbox-multi')) {
+                    let group = e.target.name;
+                    let checkedBoxes = Array.from(document.querySelectorAll(`input[name="${group}"]:checked`)).map(cb => cb.value);
+                    multiSelections[group] = checkedBoxes;
+                    
+                    if (group === 'q21_22') {
+                        document.getElementById('nav-sq-21').classList.toggle('answered', checkedBoxes.length > 0);
+                        document.getElementById('nav-sq-22').classList.toggle('answered', checkedBoxes.length > 1);
+                    }
+                    if (group === 'q23_24') {
+                        document.getElementById('nav-sq-23').classList.toggle('answered', checkedBoxes.length > 0);
+                        document.getElementById('nav-sq-24').classList.toggle('answered', checkedBoxes.length > 1);
+                    }
+                } else {
+                    let qNum = e.target.getAttribute('data-q');
+                    if (e.target.type === 'radio') {
+                        userAnswers[qNum] = document.querySelector(`input[name="q${qNum}"]:checked`)?.value || '';
+                    } else {
+                        userAnswers[qNum] = e.target.value.trim();
+                    }
+                    const sq = document.getElementById(`nav-sq-${qNum}`);
+                    if(sq) sq.classList.toggle('answered', userAnswers[qNum] !== '');
+                }
+            });
+        });
+    }
+
+    document.getElementById('topSubmitBtn').onclick = () => {
+        if(confirm("Are you sure you want to submit your test?")) submitTest();
+    };
+
+    function submitTest() {
+        clearInterval(countdown);
+        for(let i=1; i<=TOTAL_PARTS; i++) {
+            let a = document.getElementById(`audio-${i}`);
+            if(a) a.pause();
+        }
+
+        document.getElementById('test-container').style.display = 'none';
+        document.getElementById('results-screen').style.display = 'flex';
+
+        let score = 0;
+        let tbody = document.getElementById('results-body');
+        tbody.innerHTML = '';
+
+        for (let i = 1; i <= 40; i++) {
+            let tr = document.createElement('tr');
+            if ([21, 22, 23, 24].includes(i)) {
+                let group = (i === 21 || i === 22) ? 'q21_22' : 'q23_24';
+                let correctKeys = multiAnswerKey[group];
+                let userSelections = multiSelections[group] || [];
+                let uAns = userSelections[i % 2 === 1 ? 0 : 1] || '-'; 
+                
+                let isCorrect = false;
+                if (uAns !== '-' && correctKeys.includes(uAns)) { isCorrect = true; }
+                if (isCorrect) score++;
+
+                tr.innerHTML = `
+                    <td>${i}</td>
+                    <td>${uAns}</td>
+                    <td>${correctKeys.join(', ')} (Any Order)</td>
+                    <td class="${isCorrect ? 'correct' : 'incorrect'}">${isCorrect ? '✔ Correct' : '✘ Incorrect'}</td>
+                `;
+            } else {
+                let uAns = (userAnswers[i] || '').toLowerCase();
+                let cAnsList = answerKey[i] || [];
+                let isCorrect = cAnsList.some(ans => ans.toLowerCase() === uAns);
+                if (isCorrect) score++;
+
+                tr.innerHTML = `
+                    <td>${i}</td>
+                    <td>${userAnswers[i] || '-'}</td>
+                    <td>${cAnsList.join(' / ')}</td>
+                    <td class="${isCorrect ? 'correct' : 'incorrect'}">${isCorrect ? '✔ Correct' : '✘ Incorrect'}</td>
+                `;
+            }
+            tbody.appendChild(tr);
+        }
+        document.getElementById('final-score').textContent = `Score: ${score} / 40`;
+    }
+
+    function downloadScreenshot() {
+        const btn = document.getElementById('btn-screenshot');
+        const card = document.getElementById('results-card');
+        const scrollContainer = document.getElementById('table-scroll-container');
+        
+        const originalCardHeight = card.style.maxHeight;
+        const originalScrollHeight = scrollContainer.style.maxHeight;
+        const originalOverflow = scrollContainer.style.overflowY;
+        
+        card.style.maxHeight = 'none';
+        scrollContainer.style.maxHeight = 'none';
+        scrollContainer.style.overflowY = 'visible';
+        
+        btn.textContent = "Processing full image...";
+
+        html2canvas(card, { scale: 1.5, backgroundColor: "#ffffff", windowHeight: card.scrollHeight }).then(canvas => {
+            const link = document.createElement('a');
+            const candidateName = document.getElementById('candidateName').value.trim() || 'Candidate';
+            link.download = `IELTS_Results_${candidateName}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+            card.style.maxHeight = originalCardHeight;
+            scrollContainer.style.maxHeight = originalScrollHeight;
+            scrollContainer.style.overflowY = originalOverflow;
+            btn.textContent = "📷 Download Screenshot";
+        }).catch(err => {
+            console.error("Screenshot error:", err);
+            alert("Failed to capture screenshot.");
+            card.style.maxHeight = originalCardHeight;
+            scrollContainer.style.maxHeight = originalScrollHeight;
+            scrollContainer.style.overflowY = originalOverflow;
+            btn.textContent = "📷 Download Screenshot";
+        });
+    }
+</script>
+</body>
+</html>
