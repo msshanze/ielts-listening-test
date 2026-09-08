@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cambridge IELTS 21 Academic Listening Test 2</title>
+    <!-- Include html2canvas for the screenshot feature -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        :root {
+            --top-bar-bg: #333333;
+            --bottom-bar-bg: #e0e0e0;
+            --main-bg: #808080;
+            --content-bg: #ffffff;
+            --accent-red: #c5221f;
+            --accent-blue: #1a73e8;
+            --text-light: #ffffff;
+            --text-dark: #333333;
+            --border-color: #cccccc;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: var(--content-bg); color: var(--text-dark); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+        /* --- Screens --- */
+        #start-screen, #results-screen { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: #f4f6f8; display: flex; flex-direction: column; 
+            align-items: center; justify-content: center; z-index: 1000; overflow-y: auto; padding: 20px;
+        }
+        .box-card { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); width: 100%; max-width: 800px; text-align: center; }
+        .box-card h1 { color: var(--text-dark); margin-bottom: 10px; }
+        .name-input-box { padding: 12px; font-size: 16px; width: 100%; max-width: 300px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 20px; text-align: center; }
+        .btn-primary { background-color: var(--accent-blue); color: white; padding: 12px 30px; border: none; cursor: pointer; font-weight: bold; font-size: 16px; border-radius: 4px; }
+        .btn-primary:hover { background-color: #1557b0; }
+        .btn-danger { background-color: var(--accent-red); color: white; padding: 8px 20px; border: none; cursor: pointer; font-weight: bold; font-size: 14px; border-radius: 4px; }
+        .btn-danger:hover { background-color: #a31916; }
+
+        /* --- Test Interface --- */
+        #test-container { display: none; flex-direction: column; height: 100vh; width: 100%; }
+        #top-bar { background-color: var(--top-bar-bg); color: var(--text-light); display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; height: 60px; }
+        .top-left { display: flex; flex-direction: column; font-size: 14px; }
+        .top-left strong { font-size: 16px; }
+        .timer-display { font-size: 13px; color: #aaa; }
+        .top-right { display: flex; align-items: center; gap: 20px; }
+        
+        #main-content { flex: 1; position: relative; background-color: var(--main-bg); overflow-y: auto; }
+        .part-container { display: none; background-color: var(--content-bg); min-height: 100%; padding: 40px; max-width: 1000px; margin: 0 auto; box-shadow: 0 0 10px rgba(0,0,0,0.5); }
+        .part-container.active { display: block; }
+
+        /* --- Audio Overlay --- */
+        .audio-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(60, 60, 60, 0.95); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 50; color: white; text-align: center; padding: 20px;
+        }
+        .headphone-icon { font-size: 60px; margin-bottom: 20px; }
+        .audio-overlay p { margin-bottom: 20px; font-size: 16px; max-width: 600px; line-height: 1.5; }
+        .btn-play { background-color: black; color: white; border: 1px solid white; padding: 10px 30px; font-size: 16px; cursor: pointer; border-radius: 4px; display: flex; align-items: center; gap: 10px; }
+        .btn-play:hover { background-color: #222; }
+        audio { display: none; }
+
+        /* --- Content Styling --- */
+        h2 { font-size: 18px; margin-bottom: 10px; }
+        .instructions { font-size: 14px; margin-bottom: 20px; font-style: italic; color: #444; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 40px; font-size: 14px; }
+        th, td { border: 1px solid var(--border-color); padding: 12px; text-align: left; vertical-align: top; }
+        th { background-color: #f9f9f9; text-align: center; }
+        .input-group { display: inline-flex; align-items: center; margin: 0 5px; }
+        .q-num { background: #333; color: white; padding: 2px 6px; font-weight: bold; font-size: 12px; border-radius: 2px; margin-right: 5px; display: inline-block; }
+        .input-box { border: 1px solid #999; padding: 4px 8px; width: 140px; font-size: 14px; background-color: #fff; border-radius: 2px; }
+        .input-box:focus { background-color: #fff9c4; outline: none; border-color: #fbc02d; }
+        .mcq-container { margin-bottom: 25px; font-size: 14px; }
+        .mcq-question { font-weight: bold; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        .mcq-option { display: flex; align-items: center; margin-bottom: 8px; padding-left: 10px; cursor: pointer; gap: 8px; }
+        .mcq-option input[type="checkbox"], .mcq-option input[type="radio"] { cursor: pointer; width: 16px; height: 16px; }
+        .notes-section { border: 1px solid #e0e0e0; padding: 20px; margin-bottom: 40px; font-size: 14px; background-color: #fff; border-radius: 4px; }
+        ul { padding-left: 20px; margin: 0; } li { margin-bottom: 10px; line-height: 1.5; }
+
+        /* --- Map Labelling --- */
+        .map-container { display: flex; gap: 25px; align-items: flex-start; flex-wrap: wrap; margin-bottom: 40px; }
+        .map-image { flex: 1; min-width: 300px; max-width: 440px; }
+        .map-image img { width: 100%; height: auto; border: 1px solid #ccc; border-radius: 4px; display: block; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+        .map-grid { flex: 1.2; min-width: 320px; overflow-x: auto; }
+        .radio-grid { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 0; }
+        .radio-grid th, .radio-grid td { border: 1px solid var(--border-color); padding: 8px 6px; text-align: center; vertical-align: middle; }
+        .radio-grid th { background-color: #f9f9f9; font-weight: bold; min-width: 28px; }
+        .radio-grid td:first-child { text-align: left; padding-left: 10px; white-space: nowrap; font-weight: 500; }
+        .radio-grid input[type="radio"] { cursor: pointer; width: 16px; height: 16px; }
+
+        /* --- Flow-Chart Matching (Part 3) --- */
+        .flowchart-wrapper { margin: 25px 0 35px 0; font-size: 14px; }
+        .flowchart-title { font-weight: bold; font-size: 15px; margin-bottom: 15px; }
+        .flowchart-container { display: flex; flex-direction: column; align-items: flex-start; max-width: 450px; }
+        .flowchart-step { width: 100%; border: 1px solid #ccc; background: #fafafa; padding: 12px 18px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .flowchart-step-label { font-weight: 600; color: #222; }
+        .flowchart-arrow { width: 100%; text-align: center; font-size: 20px; color: #666; padding: 6px 0; line-height: 1; }
+        .matching-options-box { margin-top: 25px; border: 1px solid #e0e0e0; background: #fdfdfd; padding: 18px; border-radius: 6px; }
+        .matching-options-box h4 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; color: #666; margin-bottom: 12px; }
+        .matching-option-pill { display: inline-block; background: #fff; border: 1px solid #d0d7de; padding: 7px 12px; margin: 4px; border-radius: 4px; font-size: 13px; cursor: pointer; transition: all 0.2s ease; }
+        .matching-option-pill:hover { border-color: var(--accent-blue); background: #f0f7ff; }
+        .matching-option-pill strong { color: var(--accent-blue); margin-right: 4px; }
+
+        /* --- Navigation --- */
+        #bottom-bar { background-color: var(--bottom-bar-bg); height: 60px; display: flex; align-items: center; padding: 0 20px; justify-content: space-between; border-top: 1px solid #ccc; }
+        .nav-parts { display: flex; gap: 30px; font-size: 13px; font-weight: bold; color: #555; align-items: center; }
+        .nav-part-item { display: flex; align-items: center; gap: 5px; }
+        .nav-part-item.active { color: #000; }
+        .q-squares { display: flex; gap: 2px; margin-left: 10px; }
+        .q-square { width: 22px; height: 22px; background: transparent; border: 1px solid #999; display: flex; align-items: center; justify-content: center; font-size: 11px; cursor: pointer; color: #333; border-radius: 2px; }
+        .q-square.answered { background: #555; color: white; border-color: #555; }
+        .nav-arrows { display: flex; gap: 10px; }
+        .btn-nav { background: #333; color: white; border: none; padding: 8px 15px; cursor: pointer; font-size: 16px; border-radius: 2px; }
+        .btn-nav:disabled { background: #999; cursor: not-allowed; }
+
+        /* --- Results Table --- */
+        .results-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; text-align: left; }
+        .results-table th, .results-table td { border: 1px solid #ddd; padding: 8px 12px; }
+        .results-table th { background-color: #f1f3f4; position: sticky; top: 0; z-index: 10; text-align: left; }
+        .results-table tr.result-correct td { background-color: #d9ead3; }
+        .results-table tr.result-incorrect td { background-color: #f8d0d0; }
+        .correct { color: #137333; font-weight: bold; }
+        .incorrect { color: #c5221f; font-weight: bold; }
+        .results-summary { margin: 8px 0 4px; }
+        .results-summary .band-score { color: #a40000; font-size: 16px; font-weight: 700; margin: 0 0 12px; }
+        .results-summary .raw-score { color: #102a43; font-size: 16px; font-weight: 700; margin: 0 0 12px; }
+        .results-summary .time-taken { color: #102a43; font-size: 14px; font-weight: 700; margin: 0; }
+        .actions { margin-top: 20px; display: flex; gap: 15px; justify-content: center; }
+        
+        #table-scroll-container { flex: 1; overflow-y: auto; margin: 20px 0; border: 1px solid #ddd; background: #fff; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<!-- START SCREEN -->
+<div id="start-screen">
+    <div class="box-card">
+        <h1>IELTS Listening Test</h1>
+        <p style="margin-bottom: 20px; color: #666;">Cambridge 21 Academic - Test 2</p>
+        <input type="text" id="candidateName" class="name-input-box" placeholder="Enter Full Name" autocomplete="off">
+        <br>
+        <button id="startBtn" class="btn-primary" type="button">Start Test</button>
+    </div>
+</div>
+
+<!-- TEST CONTAINER -->
+<div id="test-container">
+    <div id="top-bar">
+        <div class="top-left">
+            <strong>Listening Test - 01</strong>
+            <span class="timer-display"><span id="timer">30:00</span> remaining</span>
+        </div>
+        <div class="top-right">
+            <span id="candidateDisplay" style="font-size: 14px; color: #ccc;"></span>
+            <button id="topSubmitBtn" class="btn-danger">Submit</button>
+        </div>
+    </div>
+
+    <div id="main-content">
+        <!-- ==================== PART 1 ==================== -->
+        <div class="part-container active" id="part-1">
+            <div class="audio-overlay" id="overlay-1">
+                <div class="headphone-icon">🎧</div>
+                <p>You will be listening to an audio clip during this test. You will not be permitted to pause or rewind the audio while answering the questions.</p>
+                <button class="btn-play" onclick="playAudio(1)">▶ Play</button>
+            </div>
+            <audio id="audio-1" src="ielts_21_2_1.mp3" preload="auto"></audio>
+
+            <h2>Part 1</h2><p>Listen and answer questions 1 - 10.</p>
+            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+            
+            <div class="instructions">Questions 1-10: Complete the table below. Write ONE WORD AND/OR A NUMBER for each answer.</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 22%;">Course</th>
+                        <th style="width: 22%;">Date</th>
+                        <th style="width: 18%;">Cost</th>
+                        <th style="width: 38%;">Notes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Vietnamese food</strong></td>
+                        <td><span class="input-group"><span class="q-num">1</span><input type="text" class="input-box q-input" data-q="1"></span></td>
+                        <td>£59</td>
+                        <td>
+                            <div style="margin-bottom:8px;">It provides information on the use of herbs.</div>
+                            <div>There are no places at present.</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Bread making</strong></td>
+                        <td>20 March</td>
+                        <td>£ <span class="input-group"><span class="q-num">2</span><input type="text" class="input-box q-input" data-q="2" style="width:100px;"></span></td>
+                        <td>
+                            <div style="margin-bottom:8px;">There is also an extra charge for ingredients.</div>
+                            <div>Participants make white bread, sourdough and <span class="input-group"><span class="q-num">3</span><input type="text" class="input-box q-input" data-q="3"></span>.</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Face massage</strong></td>
+                        <td>23 February</td>
+                        <td>£35</td>
+                        <td>
+                            <div style="margin-bottom:8px;">The teacher trained in <span class="input-group"><span class="q-num">4</span><input type="text" class="input-box q-input" data-q="4"></span>.</div>
+                            <div>Bring a <span class="input-group"><span class="q-num">5</span><input type="text" class="input-box q-input" data-q="5"></span>.</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Candle making</strong></td>
+                        <td><span class="input-group"><span class="q-num">6</span><input type="text" class="input-box q-input" data-q="6"></span></td>
+                        <td>£52</td>
+                        <td>
+                            <div style="margin-bottom:8px;">Only <span class="input-group"><span class="q-num">7</span><input type="text" class="input-box q-input" data-q="7"></span> ingredients are used.</div>
+                            <div>The candles can be used as presents.</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>Silk painting</strong></td>
+                        <td>18 May</td>
+                        <td>£ <span class="input-group"><span class="q-num">8</span><input type="text" class="input-box q-input" data-q="8" style="width:100px;"></span></td>
+                        <td>Bring an apron or old <span class="input-group"><span class="q-num">9</span><input type="text" class="input-box q-input" data-q="9"></span>.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DIY for beginners</strong></td>
+                        <td>24 February</td>
+                        <td>£125</td>
+                        <td>
+                            <div style="margin-bottom:8px;">Learn how to</div>
+                            <ul>
+                                <li>use a drill, saw and <span class="input-group"><span class="q-num">10</span><input type="text" class="input-box q-input" data-q="10"></span></li>
+                                <li>put up a shelf.</li>
+                            </ul>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ==================== PART 2 ==================== -->
+        <div class="part-container" id="part-2">
+            <div class="audio-overlay" id="overlay-2">
+                <div class="headphone-icon">🎧</div>
+                <p>You will be listening to an audio clip during this test. You will not be permitted to pause or rewind the audio while answering the questions.</p>
+                <button class="btn-play" onclick="playAudio(2)">▶ Play</button>
+            </div>
+            <audio id="audio-2" src="ielts_21_2_2.mp3" preload="auto"></audio>
+
+            <h2>Part 2</h2><p>Listen and answer questions 11 - 20.</p>
+            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+            
+            <!-- Q11-12: Choose TWO -->
+            <div class="instructions">Questions 11-12: Choose TWO letters, A-E.</div>
+            <div class="mcq-container">
+                <div class="mcq-question"><span class="q-num">11-12</span> Which TWO pieces of advice are given about the Marsden Coastal Walk?</div>
+                <label class="mcq-option"><input type="checkbox" name="q11_12" value="A" class="q-input checkbox-multi"> <strong>A</strong> &nbsp; Stop for lunch in an ancient town.</label>
+                <label class="mcq-option"><input type="checkbox" name="q11_12" value="B" class="q-input checkbox-multi"> <strong>B</strong> &nbsp; Don't miss the ruins of a certain building.</label>
+                <label class="mcq-option"><input type="checkbox" name="q11_12" value="C" class="q-input checkbox-multi"> <strong>C</strong> &nbsp; Catch a boat to the start of this walk.</label>
+                <label class="mcq-option"><input type="checkbox" name="q11_12" value="D" class="q-input checkbox-multi"> <strong>D</strong> &nbsp; Be careful of the steep and rocky paths.</label>
+                <label class="mcq-option"><input type="checkbox" name="q11_12" value="E" class="q-input checkbox-multi"> <strong>E</strong> &nbsp; Don't worry about getting lost.</label>
+            </div>
+
+            <!-- Q13-14: Choose TWO -->
+            <div class="instructions">Questions 13-14: Choose TWO letters, A-E.</div>
+            <div class="mcq-container">
+                <div class="mcq-question"><span class="q-num">13-14</span> Which TWO things are said about the Melby Heritage Walk?</div>
+                <label class="mcq-option"><input type="checkbox" name="q13_14" value="A" class="q-input checkbox-multi"> <strong>A</strong> &nbsp; This walk is mostly downhill.</label>
+                <label class="mcq-option"><input type="checkbox" name="q13_14" value="B" class="q-input checkbox-multi"> <strong>B</strong> &nbsp; The paths can get busy during the day.</label>
+                <label class="mcq-option"><input type="checkbox" name="q13_14" value="C" class="q-input checkbox-multi"> <strong>C</strong> &nbsp; This is a circular walk.</label>
+                <label class="mcq-option"><input type="checkbox" name="q13_14" value="D" class="q-input checkbox-multi"> <strong>D</strong> &nbsp; A tower stands on the site of an older structure.</label>
+                <label class="mcq-option"><input type="checkbox" name="q13_14" value="E" class="q-input checkbox-multi"> <strong>E</strong> &nbsp; There are far-reaching views the whole way.</label>
+            </div>
+
+            <!-- Q15-20: Map Labelling -->
+            <div class="instructions" style="margin-top:40px;">Questions 15-20: Label the map below. Write the correct letter, A-I, next to Questions 15-20.</div>
+            <div class="map-container">
+                <div class="map-image">
+                    <img src="map_part2.png" alt="Map with locations A through I">
+                </div>
+                <div class="map-grid">
+                    <table class="radio-grid">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>A</th><th>B</th><th>C</th><th>D</th><th>E</th><th>F</th><th>G</th><th>H</th><th>I</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="q-num">15</span> Exhibition</td>
+                                <td><input type="radio" name="q15" value="A" class="q-input" data-q="15"></td>
+                                <td><input type="radio" name="q15" value="B" class="q-input" data-q="15"></td>
+                                <td><input type="radio" name="q15" value="C" class="q-input" data-q="15"></td>
+                                <td><input type="radio" name="q15" value="D" class="q-input" data-q="15"></td>
+                                <td><input type="radio" name="q15" value="E" class="q-input" data-q="15"></td>
+                                <td><input type="radio" name="q15" value="F" class="q-input" data-q="15"></td>
+                                <td><input type="radio" name="q15" value="G" class="q-input" data-q="15"></td>
+                                <td><input type="radio" name="q15" value="H" class="q-input" data-q="15"></td>
+                                <td><input type="radio" name="q15" value="I" class="q-input" data-q="15"></td>
+                            </tr>
+                            <tr>
+                                <td><span class="q-num">16</span> Baths</td>
+                                <td><input type="radio" name="q16" value="A" class="q-input" data-q="16"></td>
+                                <td><input type="radio" name="q16" value="B" class="q-input" data-q="16"></td>
+                                <td><input type="radio" name="q16" value="C" class="q-input" data-q="16"></td>
+                                <td><input type="radio" name="q16" value="D" class="q-input" data-q="16"></td>
+                                <td><input type="radio" name="q16" value="E" class="q-input" data-q="16"></td>
+                                <td><input type="radio" name="q16" value="F" class="q-input" data-q="16"></td>
+                                <td><input type="radio" name="q16" value="G" class="q-input" data-q="16"></td>
+                                <td><input type="radio" name="q16" value="H" class="q-input" data-q="16"></td>
+                                <td><input type="radio" name="q16" value="I" class="q-input" data-q="16"></td>
+                            </tr>
+                            <tr>
+                                <td><span class="q-num">17</span> Tools</td>
+                                <td><input type="radio" name="q17" value="A" class="q-input" data-q="17"></td>
+                                <td><input type="radio" name="q17" value="B" class="q-input" data-q="17"></td>
+                                <td><input type="radio" name="q17" value="C" class="q-input" data-q="17"></td>
+                                <td><input type="radio" name="q17" value="D" class="q-input" data-q="17"></td>
+                                <td><input type="radio" name="q17" value="E" class="q-input" data-q="17"></td>
+                                <td><input type="radio" name="q17" value="F" class="q-input" data-q="17"></td>
+                                <td><input type="radio" name="q17" value="G" class="q-input" data-q="17"></td>
+                                <td><input type="radio" name="q17" value="H" class="q-input" data-q="17"></td>
+                                <td><input type="radio" name="q17" value="I" class="q-input" data-q="17"></td>
+                            </tr>
+                            <tr>
+                                <td><span class="q-num">18</span> Vehicles</td>
+                                <td><input type="radio" name="q18" value="A" class="q-input" data-q="18"></td>
+                                <td><input type="radio" name="q18" value="B" class="q-input" data-q="18"></td>
+                                <td><input type="radio" name="q18" value="C" class="q-input" data-q="18"></td>
+                                <td><input type="radio" name="q18" value="D" class="q-input" data-q="18"></td>
+                                <td><input type="radio" name="q18" value="E" class="q-input" data-q="18"></td>
+                                <td><input type="radio" name="q18" value="F" class="q-input" data-q="18"></td>
+                                <td><input type="radio" name="q18" value="G" class="q-input" data-q="18"></td>
+                                <td><input type="radio" name="q18" value="H" class="q-input" data-q="18"></td>
+                                <td><input type="radio" name="q18" value="I" class="q-input" data-q="18"></td>
+                            </tr>
+                            <tr>
+                                <td><span class="q-num">19</span> Ponies</td>
+                                <td><input type="radio" name="q19" value="A" class="q-input" data-q="19"></td>
+                                <td><input type="radio" name="q19" value="B" class="q-input" data-q="19"></td>
+                                <td><input type="radio" name="q19" value="C" class="q-input" data-q="19"></td>
+                                <td><input type="radio" name="q19" value="D" class="q-input" data-q="19"></td>
+                                <td><input type="radio" name="q19" value="E" class="q-input" data-q="19"></td>
+                                <td><input type="radio" name="q19" value="F" class="q-input" data-q="19"></td>
+                                <td><input type="radio" name="q19" value="G" class="q-input" data-q="19"></td>
+                                <td><input type="radio" name="q19" value="H" class="q-input" data-q="19"></td>
+                                <td><input type="radio" name="q19" value="I" class="q-input" data-q="19"></td>
+                            </tr>
+                            <tr>
+                                <td><span class="q-num">20</span> Education centre</td>
+                                <td><input type="radio" name="q20" value="A" class="q-input" data-q="20"></td>
+                                <td><input type="radio" name="q20" value="B" class="q-input" data-q="20"></td>
+                                <td><input type="radio" name="q20" value="C" class="q-input" data-q="20"></td>
+                                <td><input type="radio" name="q20" value="D" class="q-input" data-q="20"></td>
+                                <td><input type="radio" name="q20" value="E" class="q-input" data-q="20"></td>
+                                <td><input type="radio" name="q20" value="F" class="q-input" data-q="20"></td>
+                                <td><input type="radio" name="q20" value="G" class="q-input" data-q="20"></td>
+                                <td><input type="radio" name="q20" value="H" class="q-input" data-q="20"></td>
+                                <td><input type="radio" name="q20" value="I" class="q-input" data-q="20"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== PART 3 ==================== -->
+        <div class="part-container" id="part-3">
+            <div class="audio-overlay" id="overlay-3">
+                <div class="headphone-icon">🎧</div>
+                <p>You will be listening to an audio clip during this test. You will not be permitted to pause or rewind the audio while answering the questions.</p>
+                <button class="btn-play" onclick="playAudio(3)">▶ Play</button>
+            </div>
+            <audio id="audio-3" src="ielts_21_2_3.mp3" preload="auto"></audio>
+
+            <h2>Part 3</h2><p>Listen and answer questions 21 - 30.</p>
+            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+            
+            <!-- Q21-22: Choose TWO -->
+            <div class="instructions">Questions 21-22: Choose TWO letters, A-E.</div>
+            <div class="mcq-container">
+                <div class="mcq-question"><span class="q-num">21-22</span> Which TWO facts in the sessions on food safety were new information for Nadia and Fergus?</div>
+                <label class="mcq-option"><input type="checkbox" name="q21_22" value="A" class="q-input checkbox-multi"> <strong>A</strong> &nbsp; the amount of plastic in the ocean</label>
+                <label class="mcq-option"><input type="checkbox" name="q21_22" value="B" class="q-input checkbox-multi"> <strong>B</strong> &nbsp; the number of diseases caused by contaminated food</label>
+                <label class="mcq-option"><input type="checkbox" name="q21_22" value="C" class="q-input checkbox-multi"> <strong>C</strong> &nbsp; the amount of food that is wasted</label>
+                <label class="mcq-option"><input type="checkbox" name="q21_22" value="D" class="q-input checkbox-multi"> <strong>D</strong> &nbsp; the number of people who are obese</label>
+                <label class="mcq-option"><input type="checkbox" name="q21_22" value="E" class="q-input checkbox-multi"> <strong>E</strong> &nbsp; the result of treating animals with antibiotics</label>
+            </div>
+
+            <!-- Q23-24: Choose TWO -->
+            <div class="instructions">Questions 23-24: Choose TWO letters, A-E.</div>
+            <div class="mcq-container">
+                <div class="mcq-question"><span class="q-num">23-24</span> Which TWO features of a project aiming to prevent food fraud impressed Fergus?</div>
+                <label class="mcq-option"><input type="checkbox" name="q23_24" value="A" class="q-input checkbox-multi"> <strong>A</strong> &nbsp; the new technology it used</label>
+                <label class="mcq-option"><input type="checkbox" name="q23_24" value="B" class="q-input checkbox-multi"> <strong>B</strong> &nbsp; the publicity it received</label>
+                <label class="mcq-option"><input type="checkbox" name="q23_24" value="C" class="q-input checkbox-multi"> <strong>C</strong> &nbsp; the use of multiple tests on food items</label>
+                <label class="mcq-option"><input type="checkbox" name="q23_24" value="D" class="q-input checkbox-multi"> <strong>D</strong> &nbsp; the variety of dietary requirements included</label>
+                <label class="mcq-option"><input type="checkbox" name="q23_24" value="E" class="q-input checkbox-multi"> <strong>E</strong> &nbsp; the way information was made widely accessible</label>
+            </div>
+
+            <!-- Q25-26: Choose TWO -->
+            <div class="instructions">Questions 25-26: Choose TWO letters, A-E.</div>
+            <div class="mcq-container">
+                <div class="mcq-question"><span class="q-num">25-26</span> Which TWO topics do both students recommend should be included in the course?</div>
+                <label class="mcq-option"><input type="checkbox" name="q25_26" value="A" class="q-input checkbox-multi"> <strong>A</strong> &nbsp; sustainable fishing</label>
+                <label class="mcq-option"><input type="checkbox" name="q25_26" value="B" class="q-input checkbox-multi"> <strong>B</strong> &nbsp; targeted nutrition</label>
+                <label class="mcq-option"><input type="checkbox" name="q25_26" value="C" class="q-input checkbox-multi"> <strong>C</strong> &nbsp; global differences in consumption</label>
+                <label class="mcq-option"><input type="checkbox" name="q25_26" value="D" class="q-input checkbox-multi"> <strong>D</strong> &nbsp; sustainable agriculture</label>
+                <label class="mcq-option"><input type="checkbox" name="q25_26" value="E" class="q-input checkbox-multi"> <strong>E</strong> &nbsp; digital technology and food</label>
+            </div>
+
+            <!-- Q27-30: Flow-chart Completion -->
+            <div class="instructions" style="margin-top:40px;">Questions 27-30: Complete the flow-chart below. Choose FOUR answers from the box and write the correct letter, A-F, next to Questions 27-30.</div>
+            
+            <div class="flowchart-wrapper">
+                <div class="flowchart-title">Student project: developing a new food product</div>
+                <div class="flowchart-container">
+                    <div class="flowchart-step">
+                        <span class="flowchart-step-label">Initial aim</span>
+                        <span class="input-group">
+                            <span class="q-num">27</span>
+                            <input type="text" class="input-box q-input letter-input" data-q="27" maxlength="1" style="width:45px; text-align:center; text-transform:uppercase; font-weight:bold;">
+                        </span>
+                    </div>
+                    <div class="flowchart-arrow">↓</div>
+                    <div class="flowchart-step">
+                        <span class="flowchart-step-label">Literature review</span>
+                        <span class="input-group">
+                            <span class="q-num">28</span>
+                            <input type="text" class="input-box q-input letter-input" data-q="28" maxlength="1" style="width:45px; text-align:center; text-transform:uppercase; font-weight:bold;">
+                        </span>
+                    </div>
+                    <div class="flowchart-arrow">↓</div>
+                    <div class="flowchart-step">
+                        <span class="flowchart-step-label">Product development</span>
+                        <span class="input-group">
+                            <span class="q-num">29</span>
+                            <input type="text" class="input-box q-input letter-input" data-q="29" maxlength="1" style="width:45px; text-align:center; text-transform:uppercase; font-weight:bold;">
+                        </span>
+                    </div>
+                    <div class="flowchart-arrow">↓</div>
+                    <div class="flowchart-step">
+                        <span class="flowchart-step-label">Product production</span>
+                        <span class="input-group">
+                            <span class="q-num">30</span>
+                            <input type="text" class="input-box q-input letter-input" data-q="30" maxlength="1" style="width:45px; text-align:center; text-transform:uppercase; font-weight:bold;">
+                        </span>
+                    </div>
+                </div>
+
+                <div class="matching-options-box">
+                    <h4>Options (Click an option to fill the active/next blank, or type the letter):</h4>
+                    <div>
+                        <span class="matching-option-pill" onclick="fillFlowchart('A')"><strong>A</strong> This was challenging but enjoyable.</span>
+                        <span class="matching-option-pill" onclick="fillFlowchart('B')"><strong>B</strong> This led to some disagreement.</span>
+                        <span class="matching-option-pill" onclick="fillFlowchart('C')"><strong>C</strong> This was easy to decide on.</span>
+                        <span class="matching-option-pill" onclick="fillFlowchart('D')"><strong>D</strong> This was helped by the guidelines provided.</span>
+                        <span class="matching-option-pill" onclick="fillFlowchart('E')"><strong>E</strong> This seemed like an unnecessary stage.</span>
+                        <span class="matching-option-pill" onclick="fillFlowchart('F')"><strong>F</strong> This involved selecting a new ingredient.</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== PART 4 ==================== -->
+        <div class="part-container" id="part-4">
+            <div class="audio-overlay" id="overlay-4">
+                <div class="headphone-icon">🎧</div>
+                <p>You will be listening to an audio clip during this test. You will not be permitted to pause or rewind the audio while answering the questions.</p>
+                <button class="btn-play" onclick="playAudio(4)">▶ Play</button>
+            </div>
+            <audio id="audio-4" src="ielts_21_2_4.mp3" preload="auto"></audio>
+
+            <h2>Part 4</h2><p>Listen and answer questions 31 - 40.</p>
+            <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+            
+            <div class="instructions">Questions 31-40: Complete the notes below. Write ONE WORD ONLY for each answer.</div>
+            <div class="notes-section">
+                <h3 style="margin-bottom:15px;">Challenges facing the cruise ship industry</h3>
+
+                <h4 style="margin-top:15px; margin-bottom:10px; color:#222;">Problems with overtourism</h4>
+                <ul>
+                    <li><span class="input-group"><span class="q-num">31</span><input type="text" class="input-box q-input" data-q="31"></span> is one of the worst problems.</li>
+                    <li>A tourist <span class="input-group"><span class="q-num">32</span><input type="text" class="input-box q-input" data-q="32"></span> is being introduced in some cities to reduce numbers, e.g. Barcelona.</li>
+                    <li>Bruges: action was taken to limit day trips from the nearby port because the city was becoming a 'theme park' (e.g. many shops were only stocking <span class="input-group"><span class="q-num">33</span><input type="text" class="input-box q-input" data-q="33"></span> and souvenirs).</li>
+                    <li>Dubrovnik: limits the number of tourists by managing the <span class="input-group"><span class="q-num">34</span><input type="text" class="input-box q-input" data-q="34"></span> of cruise ship arrivals.</li>
+                </ul>
+
+                <h4 style="margin-top:20px; margin-bottom:10px; color:#222;">Problems of perception</h4>
+                <ul>
+                    <li>Cruises are generally associated with the elderly.</li>
+                    <li>There is an assumption about the <span class="input-group"><span class="q-num">35</span><input type="text" class="input-box q-input" data-q="35"></span> of cruises.</li>
+                    <li>People think there may be too many <span class="input-group"><span class="q-num">36</span><input type="text" class="input-box q-input" data-q="36"></span>.</li>
+                </ul>
+
+                <h4 style="margin-top:20px; margin-bottom:10px; color:#222;">Solutions</h4>
+                <p style="margin-bottom:10px;">Cruise lines are attracting younger customers by:</p>
+                <ul>
+                    <li>becoming more sustainable e.g. using hybrid engines.</li>
+                    <li>having a wide range of activities e.g. boxing, <span class="input-group"><span class="q-num">37</span><input type="text" class="input-box q-input" data-q="37"></span> and well-being programmes.</li>
+                    <li>offering a diverse selection of food including <span class="input-group"><span class="q-num">38</span><input type="text" class="input-box q-input" data-q="38"></span> options.</li>
+                    <li>providing reliable <span class="input-group"><span class="q-num">39</span><input type="text" class="input-box q-input" data-q="39"></span>.</li>
+                    <li>improving marketing on social media with high quality <span class="input-group"><span class="q-num">40</span><input type="text" class="input-box q-input" data-q="40"></span>.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div id="bottom-bar">
+        <div class="nav-parts" id="nav-parts-container"></div>
+        <div class="nav-arrows">
+            <button class="btn-nav" id="btn-prev" onclick="changePart(-1)">←</button>
+            <button class="btn-nav" id="btn-next" onclick="changePart(1)">→</button>
+        </div>
+    </div>
+</div>
+
+<!-- RESULTS SCREEN -->
+<div id="results-screen" style="display:none;">
+    <div class="box-card" id="results-card" style="max-width: 900px; max-height: 95vh; display: flex; flex-direction: column;">
+        <h2 style="margin-bottom: 5px;">Test Submitted</h2>
+        <h4 id="results-name" style="color: #666; margin-bottom: 10px;">Candidate: </h4>
+        <div class="results-summary" aria-live="polite">
+            <p class="band-score" id="final-band">Band Score: 1</p>
+            <p class="raw-score" id="final-score">0 / 40</p>
+            <p class="time-taken" id="time-taken">Time taken: 00:00:00</p>
+        </div>
+        
+        <div id="table-scroll-container">
+            <table class="results-table" id="results-table" style="margin-top: 0;">
+                <thead>
+                    <tr>
+                        <th style="width:10%;">Q#</th>
+                        <th style="width:30%;">Your Answer</th>
+                        <th style="width:60%;">Correct Answer</th>
+                    </tr>
+                </thead>
+                <tbody id="results-body"></tbody>
+            </table>
+        </div>
+
+        <div class="actions" data-html2canvas-ignore="true">
+            <button class="btn-primary" id="btn-screenshot" onclick="downloadScreenshot()">📷 Download Screenshot</button>
+            <button class="btn-danger" onclick="location.reload()">Restart Test</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const TOTAL_PARTS = 4;
+    const TIME_LIMIT_MINUTES = 30;
+    const SECRET_PASSWORD = "reema14"; // Access password
+    
+    // Single-answer key (text inputs, radio grids, and flowchart matching).
+    const answerKey = {
+        // Part 1 - Table completion (Q1-10)
+        1: ["13th January", "13 January", "January 13", "January 13th", "13.01", "13.1"],
+        2: ["48"],
+        3: ["pizza"],
+        4: ["India"],
+        5: ["mirror"],
+        6: ["6th April", "6 April", "April 6", "April 6th", "06.04", "6.4"],
+        7: ["natural"],
+        8: ["67.50"],
+        9: ["shirt"],
+        10: ["hammer"],
+
+        // Part 2 - Map labelling (Q15-20: A-I)
+        15: ["F"],
+        16: ["B"],
+        17: ["D"],
+        18: ["A"],
+        19: ["H"],
+        20: ["E"],
+
+        // Part 3 - Flow-chart Completion (Q27-30: A-F)
+        27: ["C"],
+        28: ["D"],
+        29: ["F"],
+        30: ["A"],
+
+        // Part 4 - Notes completion (Q31-40)
+        31: ["Pollution"],
+        32: ["tax"],
+        33: ["chocolate"],
+        34: ["timing"],
+        35: ["cost"],
+        36: ["rules"],
+        37: ["diving"],
+        38: ["vegan"],
+        39: ["wifi", "wi-fi"],
+        40: ["videos"]
+    };
+    
+    // Multi-answer key for checkbox pairs (Choose TWO letters)
+    const multiAnswerKey = {
+        'q11_12': ['B', 'E'],
+        'q13_14': ['C', 'D'],
+        'q21_22': ['B', 'E'],
+        'q23_24': ['C', 'D'],
+        'q25_26': ['A', 'C']
+    };
+
+    // Maps each individual question number to its multi-answer group
+    const multiQuestionMap = {
+        11: 'q11_12', 12: 'q11_12',
+        13: 'q13_14', 14: 'q13_14',
+        21: 'q21_22', 22: 'q21_22',
+        23: 'q23_24', 24: 'q23_24',
+        25: 'q25_26', 26: 'q25_26'
+    };
+
+    let currentPart = 1;
+    let countdown;
+    let userAnswers = {}; 
+    let multiSelections = {
+        'q11_12': [],
+        'q13_14': [],
+        'q21_22': [],
+        'q23_24': [],
+        'q25_26': []
+    }; 
+    let audioCompleted = {1: false, 2: false, 3: false, 4: false};
+    let activeFlowchartInput = '27';
+    let testStartedAt = null;
+
+    window.addEventListener('DOMContentLoaded', () => {
+        for (let i = 1; i <= TOTAL_PARTS; i++) {
+            let a = document.getElementById(`audio-${i}`);
+            if (a) {
+                a.addEventListener('ended', () => {
+                    audioCompleted[i] = true;
+                });
+            }
+        }
+    });
+
+    document.getElementById('startBtn').onclick = () => {
+        const enteredPassword = prompt("Please enter the test access password:");
+        if (enteredPassword !== SECRET_PASSWORD) {
+            alert("Incorrect password! Access denied.");
+            return;
+        }
+
+        const name = document.getElementById('candidateName').value.trim();
+        if (!name) return alert("Please enter your name.");
+        
+        document.getElementById('candidateDisplay').textContent = `Candidate: ${name}`;
+        document.getElementById('results-name').textContent = `Candidate: ${name}`;
+        document.getElementById('start-screen').style.display = 'none';
+        document.getElementById('test-container').style.display = 'flex';
+        
+        buildBottomNav();
+        testStartedAt = Date.now();
+        startTimer();
+        trackInputs();
+    };
+
+    function startTimer() {
+        let timeLeft = TIME_LIMIT_MINUTES * 60;
+        countdown = setInterval(() => {
+            let m = Math.floor(timeLeft / 60);
+            let s = timeLeft % 60;
+            document.getElementById('timer').textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+            if (timeLeft <= 0) {
+                clearInterval(countdown);
+                submitTest();
+            }
+            timeLeft--;
+        }, 1000);
+    }
+
+    function playAudio(partNum) {
+        document.getElementById(`overlay-${partNum}`).style.display = 'none';
+        const audioEl = document.getElementById(`audio-${partNum}`);
+        audioEl.play().catch(error => {
+            console.error("Audio failed to play:", error);
+            alert("Audio could not start. Please ensure your browser allows audio playback.");
+        });
+    }
+
+    function isQuestionAnswered(q) {
+        if (multiQuestionMap[q]) {
+            let group = multiQuestionMap[q];
+            let firstQ = parseInt(group.substring(1).split('_')[0]);
+            let pos = q - firstQ; // 0 or 1
+            return (multiSelections[group] && multiSelections[group].length > pos);
+        }
+        return (userAnswers[q] !== undefined && userAnswers[q] !== '');
+    }
+
+    function buildBottomNav() {
+        const container = document.getElementById('nav-parts-container');
+        container.innerHTML = '';
+        for (let p = 1; p <= TOTAL_PARTS; p++) {
+            let partDiv = document.createElement('div');
+            partDiv.className = `nav-part-item ${p === currentPart ? 'active' : ''}`;
+            
+            let titleSpan = document.createElement('span');
+            titleSpan.textContent = `Part ${p}`;
+            partDiv.appendChild(titleSpan);
+
+            if (p === currentPart) {
+                let squaresDiv = document.createElement('div');
+                squaresDiv.className = 'q-squares';
+                let startQ = (p - 1) * 10 + 1;
+                for (let q = startQ; q < startQ + 10; q++) {
+                    let sq = document.createElement('div');
+                    sq.className = 'q-square';
+                    sq.id = `nav-sq-${q}`;
+                    sq.textContent = q;
+                    
+                    if (isQuestionAnswered(q)) sq.classList.add('answered');
+                    squaresDiv.appendChild(sq);
+                }
+                partDiv.appendChild(squaresDiv);
+            } else {
+                let summarySpan = document.createElement('span');
+                summarySpan.style.color = '#888';
+                summarySpan.style.marginLeft = '10px';
+                let ansCount = 0;
+                let startQ = (p - 1) * 10 + 1;
+                for (let i = startQ; i < startQ + 10; i++) {
+                    if (isQuestionAnswered(i)) ansCount++;
+                }
+                summarySpan.textContent = `${ansCount} of 10`;
+                partDiv.appendChild(summarySpan);
+            }
+            container.appendChild(partDiv);
+        }
+        
+        document.getElementById('btn-prev').disabled = currentPart === 1;
+        document.getElementById('btn-next').disabled = currentPart === TOTAL_PARTS;
+    }
+
+    function changePart(dir) {
+        if (dir === 1 && !audioCompleted[currentPart]) {
+            alert("You must finish listening to the audio for this part before you can move to the next part.");
+            return;
+        }
+
+        document.getElementById(`part-${currentPart}`).classList.remove('active');
+        currentPart += dir;
+        document.getElementById(`part-${currentPart}`).classList.add('active');
+        buildBottomNav();
+    }
+
+    function trackInputs() {
+        document.querySelectorAll('.q-input').forEach(input => {
+            const handler = (e) => {
+                if (e.target.classList.contains('checkbox-multi')) {
+                    let group = e.target.name;
+                    let checkedBoxes = Array.from(document.querySelectorAll(`input[name="${group}"]:checked`));
+                    
+                    // Enforce maximum 2 selections
+                    if (checkedBoxes.length > 2) {
+                        e.target.checked = false;
+                        alert("You can only select TWO options for this question.");
+                        return;
+                    }
+                    
+                    multiSelections[group] = checkedBoxes.map(cb => cb.value);
+                    
+                    let parts = group.substring(1).split('_');
+                    let firstQ = parseInt(parts[0]);
+                    let secondQ = parseInt(parts[1]);
+                    const sq1 = document.getElementById(`nav-sq-${firstQ}`);
+                    const sq2 = document.getElementById(`nav-sq-${secondQ}`);
+                    if (sq1) sq1.classList.toggle('answered', multiSelections[group].length > 0);
+                    if (sq2) sq2.classList.toggle('answered', multiSelections[group].length > 1);
+                } else {
+                    let qNum = e.target.getAttribute('data-q');
+                    if (e.target.type === 'radio') {
+                        userAnswers[qNum] = document.querySelector(`input[name="q${qNum}"]:checked`)?.value || '';
+                    } else {
+                        userAnswers[qNum] = e.target.value.trim();
+                    }
+                    const sq = document.getElementById(`nav-sq-${qNum}`);
+                    if (sq) sq.classList.toggle('answered', userAnswers[qNum] !== '');
+                }
+            };
+
+            input.addEventListener('input', handler);
+            input.addEventListener('change', handler);
+
+            // Track active input for flowchart
+            if (input.classList.contains('letter-input')) {
+                input.addEventListener('focus', () => {
+                    activeFlowchartInput = input.getAttribute('data-q');
+                });
+                input.addEventListener('input', (e) => {
+                    e.target.value = e.target.value.toUpperCase();
+                });
+            }
+        });
+    }
+
+    // Helper for flowchart option pill click
+    function fillFlowchart(letter) {
+        let targetQ = activeFlowchartInput;
+        let targetEl = document.querySelector(`input[data-q="${targetQ}"]`);
+        
+        // If current active is already filled, find next empty between 27-30
+        if (targetEl && targetEl.value !== '') {
+            for (let q = 27; q <= 30; q++) {
+                let el = document.querySelector(`input[data-q="${q}"]`);
+                if (el && !el.value) {
+                    targetQ = q.toString();
+                    targetEl = el;
+                    break;
+                }
+            }
+        }
+        
+        if (targetEl) {
+            targetEl.value = letter;
+            userAnswers[targetQ] = letter;
+            const sq = document.getElementById(`nav-sq-${targetQ}`);
+            if (sq) sq.classList.add('answered');
+            
+            // Advance activeFlowchartInput
+            let nextNum = parseInt(targetQ) + 1;
+            if (nextNum <= 30) {
+                activeFlowchartInput = nextNum.toString();
+                let nextEl = document.querySelector(`input[data-q="${nextNum}"]`);
+                if (nextEl) nextEl.focus();
+            }
+        }
+    }
+
+    document.getElementById('topSubmitBtn').onclick = () => {
+        if (confirm("Are you sure you want to submit your test?")) submitTest();
+    };
+
+    function submitTest() {
+        clearInterval(countdown);
+        for (let i = 1; i <= TOTAL_PARTS; i++) {
+            let a = document.getElementById(`audio-${i}`);
+            if (a) a.pause();
+        }
+
+        document.getElementById('test-container').style.display = 'none';
+        document.getElementById('results-screen').style.display = 'flex';
+
+        let score = 0;
+        let tbody = document.getElementById('results-body');
+        tbody.innerHTML = '';
+
+        for (let i = 1; i <= 40; i++) {
+            let tr = document.createElement('tr');
+            
+            if (multiQuestionMap[i]) {
+                // Multi-answer (checkbox) question
+                let group = multiQuestionMap[i];
+                let correctKeys = multiAnswerKey[group] || [];
+                let userSels = multiSelections[group] || [];
+                let firstQ = parseInt(group.substring(1).split('_')[0]);
+                let idx = i - firstQ; // 0 or 1
+                let uAns = userSels[idx] || '-';
+                
+                let isCorrect = false;
+                if (uAns !== '-' && correctKeys.includes(uAns)) { 
+                    isCorrect = true; 
+                }
+                if (isCorrect) score++;
+                tr.className = isCorrect ? 'result-correct' : 'result-incorrect';
+
+                tr.innerHTML = `
+                    <td><strong>${i}</strong></td>
+                    <td>${uAns}</td>
+                    <td>${correctKeys.join(', ')} <span style="color:#777; font-size:12px;">(Any Order)</span></td>
+                    <td class="${isCorrect ? 'correct' : 'incorrect'}">${isCorrect ? '✔ Correct' : '✘ Incorrect'}</td>
+                `;
+                tr.children[2].textContent = correctKeys.join(' / ');
+                tr.removeChild(tr.lastElementChild);
+            } else {
+                // Single answer question (text, radio grid, flowchart)
+                let uAns = (userAnswers[i] || '').toLowerCase();
+                let cAnsList = answerKey[i] || [];
+                let isCorrect = cAnsList.some(ans => ans.toLowerCase() === uAns);
+                if (isCorrect) score++;
+                tr.className = isCorrect ? 'result-correct' : 'result-incorrect';
+
+                tr.innerHTML = `
+                    <td><strong>${i}</strong></td>
+                    <td>${userAnswers[i] || '-'}</td>
+                    <td>${cAnsList.join(' / ')}</td>
+                    <td class="${isCorrect ? 'correct' : 'incorrect'}">${isCorrect ? '✔ Correct' : '✘ Incorrect'}</td>
+                `;
+                tr.removeChild(tr.lastElementChild);
+            }
+            tbody.appendChild(tr);
+        }
+        const elapsedSeconds = testStartedAt ? Math.floor((Date.now() - testStartedAt) / 1000) : 0;
+        document.getElementById('final-band').textContent = `Band Score: ${getAcademicListeningBand(score)}`;
+        document.getElementById('final-score').textContent = `${score} / 40`;
+        document.getElementById('time-taken').textContent = `Time taken: ${formatElapsedTime(elapsedSeconds)}`;
+    }
+
+    // IELTS Academic Listening conversion: raw score out of 40 to the reported band.
+    function getAcademicListeningBand(score) {
+        if (score >= 39) return '9';
+        if (score >= 37) return '8.5';
+        if (score >= 35) return '8';
+        if (score >= 32) return '7.5';
+        if (score >= 30) return '7';
+        if (score >= 26) return '6.5';
+        if (score >= 23) return '6';
+        if (score >= 18) return '5.5';
+        if (score >= 16) return '5';
+        if (score >= 13) return '4.5';
+        if (score >= 11) return '4';
+        if (score >= 8) return '3.5';
+        if (score >= 6) return '3';
+        if (score >= 4) return '2.5';
+        if (score >= 3) return '2';
+        if (score >= 2) return '1.5';
+        return '1';
+    }
+
+    function formatElapsedTime(totalSeconds) {
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    function downloadScreenshot() {
+        const btn = document.getElementById('btn-screenshot');
+        const card = document.getElementById('results-card');
+        const scrollContainer = document.getElementById('table-scroll-container');
+        
+        const originalCardHeight = card.style.maxHeight;
+        const originalScrollHeight = scrollContainer.style.maxHeight;
+        const originalOverflow = scrollContainer.style.overflowY;
+        
+        card.style.maxHeight = 'none';
+        scrollContainer.style.maxHeight = 'none';
+        scrollContainer.style.overflowY = 'visible';
+        
+        btn.textContent = "Processing full image...";
+
+        html2canvas(card, { scale: 1.5, backgroundColor: "#ffffff", windowHeight: card.scrollHeight }).then(canvas => {
+            const link = document.createElement('a');
+            const candidateName = document.getElementById('candidateName').value.trim() || 'Candidate';
+            link.download = `IELTS_Results_${candidateName}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+            card.style.maxHeight = originalCardHeight;
+            scrollContainer.style.maxHeight = originalScrollHeight;
+            scrollContainer.style.overflowY = originalOverflow;
+            btn.textContent = "📷 Download Screenshot";
+        }).catch(err => {
+            console.error("Screenshot error:", err);
+            alert("Failed to capture screenshot.");
+            card.style.maxHeight = originalCardHeight;
+            scrollContainer.style.maxHeight = originalScrollHeight;
+            scrollContainer.style.overflowY = originalOverflow;
+            btn.textContent = "📷 Download Screenshot";
+        });
+    }
+</script>
+</body>
+</html>
+
