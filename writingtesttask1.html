@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IELTS Academic Writing Task 1 Practice</title>
+    <style>
+        :root {
+            --ielts-paper-bg: #f2f3f5;
+            --ielts-ink: #1b1b1b;
+            --ielts-navy: #173d63;
+            --ielts-navy-deep: #102d4c;
+            --ielts-blue-soft: #eaf1f7;
+            --ielts-border: #d7dde4;
+            --ielts-table-alt: #f8f9fb;
+            --ielts-text-muted: #475569;
+            --ielts-success: #1f6d4d;
+        }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            line-height: 1.6;
+            color: var(--ielts-ink);
+            background-color: var(--ielts-paper-bg);
+            margin: 0;
+            padding: 30px 15px;
+        }
+
+        .container {
+            max-width: 760px;
+            margin: 0 auto;
+            background: #ffffff;
+            border: 1px solid var(--ielts-border);
+            border-radius: 0;
+            padding: 35px;
+            box-shadow: 0 2px 8px rgba(23, 61, 99, 0.04);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--ielts-navy-deep);
+            border-bottom: 2px solid #dfe7ef;
+            padding-bottom: 12px;
+            margin-top: 0;
+            letter-spacing: 0.02em;
+        }
+
+        .instructions {
+            font-size: 0.95rem;
+            color: var(--ielts-text-muted);
+            margin-bottom: 20px;
+        }
+
+        .prompt-box {
+            background-color: var(--ielts-blue-soft);
+            border-left: 4px solid var(--ielts-navy);
+            padding: 14px 16px;
+            font-size: 1rem;
+            margin-bottom: 25px;
+            color: #1f2d3d;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0 35px 0;
+            font-size: 0.95rem;
+        }
+
+        th, td {
+            padding: 12px 16px;
+            text-align: center;
+            border: 1px solid var(--ielts-border);
+        }
+
+        th {
+            background: linear-gradient(180deg, #173d63 0%, #12304f 100%);
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        td:first-child, th:first-child {
+            text-align: left;
+        }
+
+        tr:nth-child(even) {
+            background-color: var(--ielts-table-alt);
+        }
+
+        tr:hover {
+            background-color: #edf5fb;
+        }
+
+        .practice-section {
+            margin-top: 30px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: var(--ielts-navy-deep);
+        }
+
+        textarea {
+            width: 100%;
+            height: 220px;
+            box-sizing: border-box;
+            padding: 12px 14px;
+            font-size: 1rem;
+            font-family: inherit;
+            border: 1px solid var(--ielts-border);
+            border-radius: 0;
+            resize: vertical;
+            background: #fff;
+            color: var(--ielts-ink);
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--ielts-navy);
+            box-shadow: 0 0 0 3px rgba(23, 61, 99, 0.12);
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: var(--ielts-text-muted);
+            margin-top: 6px;
+        }
+
+        details {
+            margin-top: 30px;
+            background: #f5f7f9;
+            border: 1px solid var(--ielts-border);
+            border-radius: 0;
+            padding: 15px;
+        }
+
+        summary {
+            font-weight: 700;
+            color: var(--ielts-navy);
+            cursor: pointer;
+            outline: none;
+        }
+
+        .sample-text {
+            margin-top: 15px;
+            font-size: 0.95rem;
+            color: var(--ielts-ink);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>IELTS Academic Writing Task 1</h1>
+    
+    <div class="instructions">
+        You should spend about <strong>20 minutes</strong> on this task.
+    </div>
+
+    <div class="prompt-box">
+        The table below shows the percentage of people in five age groups who participated in regular physical activity in Australia in 2010 and 2020.
+        <br><br>
+        <em>Summarise the information by selecting and reporting the main features, and make comparisons where relevant. Write at least 150 words.</em>
+    </div>
+
+    <!-- Data Table -->
+    <table>
+        <thead>
+            <tr>
+                <th>Age group</th>
+                <th>2010</th>
+                <th>2020</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>15–24</td>
+                <td>48%</td>
+                <td>55%</td>
+            </tr>
+            <tr>
+                <td>25–34</td>
+                <td>42%</td>
+                <td>49%</td>
+            </tr>
+            <tr>
+                <td>35–44</td>
+                <td>39%</td>
+                <td>46%</td>
+            </tr>
+            <tr>
+                <td>45–54</td>
+                <td>35%</td>
+                <td>44%</td>
+            </tr>
+            <tr>
+                <td>55–64</td>
+                <td>31%</td>
+                <td>40%</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Interactive Practice Area -->
+    <div class="practice-section">
+        <label for="response">Your Response:</label>
+        <textarea id="response" placeholder="Write your report here... (minimum 150 words)"></textarea>
+        <div class="status-bar">
+            <span>Target: 150+ words</span>
+            <span id="wordCount">Words: 0</span>
+        </div>
+    </div>
+<!-- Simple Word Count Script -->
+<script>
+    const textarea = document.getElementById('response');
+    const wordCountDisplay = document.getElementById('wordCount');
+
+    textarea.addEventListener('input', () => {
+        const text = textarea.value.trim();
+        const words = text ? text.split(/\s+/).length : 0;
+        wordCountDisplay.textContent = `Words: ${words}`;
+        
+        if (words >= 150) {
+            wordCountDisplay.style.color = '#38a169'; // Green when requirement met
+            wordCountDisplay.style.fontWeight = 'bold';
+        } else {
+            wordCountDisplay.style.color = '#718096';
+            wordCountDisplay.style.fontWeight = 'normal';
+        }
+    });
+</script>
+
+</body>
+</html>
