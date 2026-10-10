@@ -131,10 +131,10 @@
         <div class="part-container active" id="part-1">
             <div class="audio-overlay" id="overlay-1">
                 <div class="headphone-icon">🎧</div>
-                <p>You will be listening to an audio clip during this test. You will not be permitted to pause or rewind the audio while answering the questions.</p>
-                <button class="btn-play" onclick="playAudio(1)">▶ Play</button>
+                <p>Press play once to begin the complete listening test. The audio will continue while you move between parts using the navigation controls.</p>
+                <button class="btn-play" onclick="playAudio()">▶ Play</button>
             </div>
-            <audio id="audio-1" src="https://github.com/msshanze/ielts-listening-test/raw/refs/heads/main/part1_audio.mp3.mp3" preload="auto"></audio>
+            <audio id="test-audio" src="combined_test.mp3" preload="auto"></audio>
 
             <h2>Part 1</h2><p>Listen and answer questions 1 - 10.</p>
             <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
@@ -179,13 +179,6 @@
 
         <!-- PART 2 -->
         <div class="part-container" id="part-2">
-            <div class="audio-overlay" id="overlay-2">
-                <div class="headphone-icon">🎧</div>
-                <p>You will be listening to an audio clip during this test. You will not be permitted to pause or rewind the audio while answering the questions.</p>
-                <button class="btn-play" onclick="playAudio(2)">▶ Play</button>
-            </div>
-            <audio id="audio-2" src="https://github.com/msshanze/ielts-listening-test/raw/refs/heads/main/part2_audio.mp3.mp3" preload="auto"></audio>
-
             <h2>Part 2</h2><p>Listen and answer questions 11 - 20.</p>
             <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
             
@@ -246,13 +239,6 @@
 
         <!-- PART 3 -->
         <div class="part-container" id="part-3">
-            <div class="audio-overlay" id="overlay-3">
-                <div class="headphone-icon">🎧</div>
-                <p>You will be listening to an audio clip during this test. You will not be permitted to pause or rewind the audio while answering the questions.</p>
-                <button class="btn-play" onclick="playAudio(3)">▶ Play</button>
-            </div>
-            <audio id="audio-3" src="https://github.com/msshanze/ielts-listening-test/raw/refs/heads/main/part3_audio.mp3.mp3" preload="auto"></audio>
-
             <h2>Part 3</h2><p>Listen and answer questions 21 - 30.</p>
             <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
             
@@ -302,13 +288,6 @@
 
         <!-- PART 4 -->
         <div class="part-container" id="part-4">
-            <div class="audio-overlay" id="overlay-4">
-                <div class="headphone-icon">🎧</div>
-                <p>You will be listening to an audio clip during this test. You will not be permitted to pause or rewind the audio while answering the questions.</p>
-                <button class="btn-play" onclick="playAudio(4)">▶ Play</button>
-            </div>
-            <audio id="audio-4" src="https://github.com/msshanze/ielts-listening-test/raw/refs/heads/main/part4_audio.mp3.mp3" preload="auto"></audio>
-
             <h2>Part 4</h2><p>Listen and answer questions 31 - 40.</p>
             <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
             
@@ -404,17 +383,14 @@
     let countdown;
     let userAnswers = {}; 
     let multiSelections = {'q21_22': [], 'q23_24': []}; 
-    let audioCompleted = {1: false, 2: false, 3: false, 4: false};
 
     window.addEventListener('DOMContentLoaded', () => {
-        for (let i = 1; i <= TOTAL_PARTS; i++) {
-            let a = document.getElementById(`audio-${i}`);
-            if (a) {
-                a.addEventListener('ended', () => {
-                    audioCompleted[i] = true;
-                });
-            }
-        }
+        document.querySelectorAll('input[type="text"]').forEach(input => {
+            input.spellcheck = false;
+            input.setAttribute('autocorrect', 'off');
+            input.setAttribute('autocapitalize', 'off');
+            input.setAttribute('autocomplete', 'off');
+        });
     });
 
     document.getElementById('startBtn').onclick = () => {
@@ -452,9 +428,9 @@
         }, 1000);
     }
 
-    function playAudio(partNum) {
-        document.getElementById(`overlay-${partNum}`).style.display = 'none';
-        const audioEl = document.getElementById(`audio-${partNum}`);
+    function playAudio() {
+        document.getElementById('overlay-1').style.display = 'none';
+        const audioEl = document.getElementById('test-audio');
         audioEl.play().catch(error => {
             console.error("Audio failed to play:", error);
             alert("Audio could not start. Please ensure your browser allows audio playback.");
@@ -518,11 +494,6 @@
     }
 
     function changePart(dir) {
-        if (dir === 1 && !audioCompleted[currentPart]) {
-            alert("You must finish listening to the audio for this part before you can move to the next part.");
-            return;
-        }
-
         document.getElementById(`part-${currentPart}`).classList.remove('active');
         currentPart += dir;
         document.getElementById(`part-${currentPart}`).classList.add('active');
@@ -565,10 +536,7 @@
 
     function submitTest() {
         clearInterval(countdown);
-        for(let i=1; i<=TOTAL_PARTS; i++) {
-            let a = document.getElementById(`audio-${i}`);
-            if(a) a.pause();
-        }
+        document.getElementById('test-audio').pause();
 
         document.getElementById('test-container').style.display = 'none';
         document.getElementById('results-screen').style.display = 'flex';
